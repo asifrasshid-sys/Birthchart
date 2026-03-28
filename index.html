@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birth Chart Calculator by Aasif Ali Nur</title>
+    <meta name="description" content="Unlock your cosmic blueprint through the ancient science of numbers - Free Numerology Birth Chart Calculator">
+    
+    <!-- React & Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', system-ui, sans-serif;
+            background: #03060f;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+        
+        #root {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useCallback } = React;
+
+        // ── Letter → Number map ──
+        const LM = {A:1,B:2,C:3,D:4,E:5,F:8,G:3,H:5,I:1,J:1,K:2,L:3,M:4,N:5,O:7,P:8,Q:1,R:2,S:3,T:4,U:6,V:6,W:6,X:5,Y:1,Z:7};
+
+        // ── Number profiles ──
+        const ND = {
+          1:{q:"Royal Nature, Authoritative, Best leadership skill, Great Imagination Power",j:"Not meant for JOB — should be Business / Entrepreneur",sk:"Hotel, Luxury Business",gn:"1, 9, 6, 5",bn:"8",gc:"Red, Green, Yellow",bc:"Black, White",st:"You are assertive, individualistic and of proud nature. You are an initiator of new beginnings and new ideas. You always tend to believe and adhere to your ideas if you know that you are on the right track.\n\nYou can be called a trendsetter who has a unique taste for everything. You don't like working under pressure and are the boss of your own. You like taking decisions for yourself and are royal and king-like in looks.",wk:"You are aggressive and don't like to compromise at any stage of life. You can be very egoistic and have anger issues as well.\n\nYou are dominating in nature and hence not a good follower. You are a good critic but on the other hand not very good at accepting criticism from others."},
+          2:{q:"Delicate, Less Stability, Impulsive mood changer, Good Host, good Sixth sense",j:"Comfort in JOB not Business",sk:"Water, Liquid, Navy, Consultancy — they are king makers",gn:"1, 5",bn:"8, 4, 9",gc:"White, Red, Green",bc:"Black",st:"You are kind-hearted, gentle, helpful and faithful. You believe in loyalty and have a special liking for poetry, music and art.\n\nYou are a peace maker who does not like quarrels. You have very strong intuition power — you can sense things and should believe in your sixth sense.",wk:"You are a person having a flickering mind who keeps on changing choices in life. You are an extremely moody person and have mood swings.\n\nYou may lack self-confidence. Nervousness and anxiety may act as a hurdle in your life."},
+          3:{q:"Knowledge, Creativity, Imagination, Communication skill, Good starter but bad finisher",j:"Job and Business Both are equal",sk:"Teacher, Preacher, Healing, Doctor, Consultancy",gn:"1, 5, 3",bn:"6",gc:"Yellow, Red, Green",bc:"White",st:"You are a creative, wise and imaginative person. Blessed by Jupiter, you are intelligent and knowledgeable. You are always curious for knowledge.\n\nYou are the scientists of life. Having keen observation and good planning ability, you can master life very well.",wk:"Sometimes your way of expressing feelings can sound loud and aggressive to others. You should listen to the point of view of others.\n\nYou also have the tendency to engage in multitasking. Taking up multiple things at the same time is not a good idea as it can lead to frustration."},
+          4:{q:"Struggle, delay but not denied, rebellious, Disciplined, Impulsive Decision",j:"Designed for Business not Job — if in job, you are killing your powers",sk:"Good in Sales, Marketing, Police, Consultancy",gn:"7, 5, 6",bn:"4, 8, 2, 9",gc:"White, Green",bc:"Grey, Black",st:"You are ruled by number 4 and don't like to work under other people. You need logic and scientific reason behind everything you do.\n\nYou have originality of new ideas and are grounded to earth. You are well disciplined and organized. You are extremely hard working.",wk:"These people face an element of delay in life in whatever they do. There can be sudden gains and sudden losses.\n\nYou can be very outspoken and blunt at times. You may be short tempered and can get easily angry."},
+          5:{q:"Balance, Great Audibility, Great Humans, Self accountable",j:"Job and Business Both are equal",sk:"Banking, Financial, Real Estate, Agriculture, Property, Company Secretary",gn:"1, 6, 5",bn:"4, 8",gc:"Green, Red, White",bc:"—",st:"You are blessed with the number of balance and stability in life. You know how to create a balance in life whether it is emotional, financial, relationship or career.\n\nYou are self-accountable and self-responsible. You are a good entertainer who keeps everyone happy.",wk:"You like changes too frequently in your life. You might easily get bored and want to bring frequent changes in your routine.\n\nYou might be a bit lazy in life too. You might sometimes take decisions in haste and can be impulsive in nature."},
+          6:{q:"Luxury, Glamour, Money, Travel, Romantic, Master of manipulation, Diplomatize",j:"Not meant for JOB — should be Business / Entrepreneur",sk:"Stock Market, Media, Jewelry, Restaurant, Hoteling, Garments, Fashion Designing",gn:"7, 6, 5, 1",bn:"3",gc:"White, Green, Blue",bc:"Yellow",st:"This is the number of luxury, family and relationships. You are very romantic and young at heart. You are quite fond of arts, paintings, music and dance.\n\nOnce you decide to achieve something big in life, you never stop. You love tour and travelling to new destinations.",wk:"Your caring and loving nature can make people take advantage of you and hence you can be a victim of back stabbing.\n\nThere are times you flirt around with people, insinuating a possible romantic relationship but then you do not commit to them."},
+          7:{q:"Low confidence, Depending on others, Suspicious, Setback in Money or Marriage — Don't trust blindly",j:"Comfort in JOB not business",sk:"Consultancy, Detective, Doctor, Researcher, Teacher, Healer",gn:"6, 4, 5",bn:"8",gc:"Red, White, Blue, Green",bc:"Black",st:"You are a person of wisdom and intelligence. You like going deep into sciences and love doing research. You are good at solving intricate problems.\n\nYou can become an excellent preacher, healer, teacher, researcher and analyst. You want to do every task with complete perfection.",wk:"You should not trust people easily as there are high chances that you will get deceived by the people whom you trust the most.\n\nYou are continuously engrossed in negative thoughts. You have a lot of mood swings and experience restlessness that can lead to anxiety and stress."},
+          8:{q:"Struggle, extreme hard work, Delay but not Denial, Strict ideas, Disciplined, Practical approach, Financial management is very good",j:"Not meant for JOB — should be Business / Entrepreneur",sk:"Iron work, Machinery, Leather, Shoe business, Law sector, Finance, CA",gn:"5, 6, 3",bn:"1, 2, 4, 8",gc:"White, Green",bc:"Black, Red",st:"Your understanding and application of logics is so deep that you want logic for everything you do. You have the number of determination and confidence.\n\nYou are a hard working person. You put a lot of physical efforts and do not avoid laborious tasks. You consider your work as worship.",wk:"People ruled by 8 experience very slow progress in life. They have to work twice as hard to achieve the same result as others.\n\nThere are times you are invariably misunderstood and perhaps, for this reason, you feel lonely as well. Your life is full of twists and turns."},
+          9:{q:"Intelligent, Self-esteem, Egoistic, Aggressive, Warrior, Mood Dependent, but great Human being",j:"Preferably Business but job is also good",sk:"Army, Police, CSS Officer, Motivational Speaking, Healing, Teaching, Education",gn:"1, 5, 3",bn:"4, 8, 2",gc:"Orange, Red, Maroon, White, Green, Yellow",bc:"Black",st:"You are a fighter and fight your way to a desired position. You are courageous and love adventure. You have a strong will power and are ambitious.\n\nYou always wait for opportunity to come and then grab it at the right time. You are a caring person who is completely devoted to his/her family.",wk:"Since you are ruled by 9, it makes you unpredictable and aggressive by nature. One moment you are happy and joyful, the other moment you hate the world.\n\nYou can be of dominating nature and even possessive for your loved ones. You should avoid over confidence and overcome restlessness."}
+        };
+
+        // ── Calculations ──
+        const reduce = (n) => { while (n > 9) n = String(n).split("").reduce((s, d) => s + parseInt(d), 0); return n; };
+        const nameNum = (name) => { const l = name.toUpperCase().replace(/[^A-Z]/g, ""); let s = 0; for (const c of l) s += LM[c] || 0; return reduce(s); };
+        const driverNum = (dd) => reduce(String(parseInt(dd)).split("").reduce((a, b) => a + parseInt(b), 0));
+        const conductorNum = (dd, mm, yyyy) => reduce((dd + mm + yyyy).split("").reduce((a, b) => a + parseInt(b), 0));
+        const kuaNum = (yyyy, gender) => {
+          const yr = reduce(String(yyyy).split("").reduce((s, d) => s + parseInt(d), 0));
+          if (gender === "Male") { let k = 11 - yr; if (k <= 0) k += 9; return reduce(k); }
+          return reduce(yr + 4);
+        };
+        const buildGrid = (dd, mm, yyyy, nn, kn, dr, cn) => {
+          const raw = (dd + mm + yyyy).split("").map(Number).filter(d => d !== 0);
+          const dc = {};
+          [...raw, dr, cn].forEach(d => { if (d >= 1 && d <= 9) dc[d] = (dc[d] || 0) + 1; });
+          const nc = {}, kc = {};
+          if (nn >= 1 && nn <= 9) nc[nn] = 1;
+          if (kn >= 1 && kn <= 9) kc[kn] = 1;
+          return [[4,9,2],[3,5,7],[8,1,6]].map(row =>
+            row.map(pos => ({ pos, dob: dc[pos] ? Array(dc[pos]).fill(pos) : [], name: nc[pos] ? [pos] : [], kua: kc[pos] ? [pos] : [] }))
+          );
+        };
+        const parseDate = (dob) => {
+          const p = dob.split("/");
+          if (p.length !== 3) return null;
+          const d = parseInt(p[0]), m = parseInt(p[1]), y = parseInt(p[2]);
+          if (isNaN(d) || isNaN(m) || isNaN(y) || d < 1 || d > 31 || m < 1 || m > 12 || y < 1800 || y > 2100) return null;
+          return { dd: String(d).padStart(2,"0"), mm: String(m).padStart(2,"0"), yyyy: String(y) };
+        };
+        const calcReport = (fn, ln, dob, gender) => {
+          if (!fn.trim() || !ln.trim() || !dob.trim()) return { err: "Please enter valid First Name, Last Name and Date of Birth." };
+          const p = parseDate(dob);
+          if (!p) return { err: "Please enter valid Date of Birth in DD/MM/YYYY format." };
+          const { dd, mm, yyyy } = p;
+          const dr = driverNum(dd), cn = conductorNum(dd, mm, yyyy), kn = kuaNum(yyyy, gender), nn = nameNum(fn + " " + ln);
+          const D = ND[dr], C = ND[cn], K = ND[kn];
+          if (!D || !C || !K) return { err: "Data not found for this input." };
+          return { fn: fn.trim(), ln: ln.trim(), dob, gender, dr, cn, kn, nn, grid: buildGrid(dd, mm, yyyy, nn, kn, dr, cn), gn: [D.gn,C.gn,K.gn].join(" · "), bn: [D.bn,C.bn,K.bn].join(" · "), gc: [D.gc,C.gc,K.gc].join(", "), bc: [D.bc,C.bc,K.bc].join(", "), job: D.j, skills: D.sk, qualities: D.q, strength: D.st, weakness: D.wk };
+        };
+
+        const CHEX = {red:"#ef4444",green:"#22c55e",yellow:"#eab308",blue:"#3b82f6",white:"#f1f5f9",black:"#1e293b",orange:"#f97316",maroon:"#9f1239",grey:"#6b7280",gray:"#6b7280",cyan:"#06b6d4"};
+        const toHex = (c) => CHEX[c.trim().toLowerCase()] || "#475569";
+        const splitC = (s) => s.split(/[,·]/).map(x => x.trim()).filter(x => x && x !== "—" && x !== "");
+
+        // ── Sub-components ──
+        function Swatches({ str }) {
+          const cols = splitC(str);
+          if (!cols.length) return <span style={{color:"#475569",fontSize:13}}>—</span>;
+          return (
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {cols.map((c, i) => (
+                <span key={i} style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(99,179,237,0.05)",border:"1px solid rgba(99,179,237,0.1)",borderRadius:100,padding:"4px 12px 4px 7px",fontSize:12,fontWeight:500,color:"#f1f5f9"}}>
+                  <span style={{width:9,height:9,borderRadius:"50%",flexShrink:0,background:toHex(c),border:c.toLowerCase()==="white"?"1px solid #334155":"none",display:"inline-block"}} />
+                  {c}
+                </span>
+              ))}
+            </div>
+          );
+        }
+
+        function GridView({ grid, nn, kn }) {
+          return (
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,width:"100%",maxWidth:320}}>
+                {grid.flat().map(({ pos, dob, name, kua }) => {
+                  const has = dob.length + name.length + kua.length > 0;
+                  return (
+                    <div key={pos} style={{background:has?"rgba(34,211,238,0.02)":"#0d1528",border:has?"1px solid rgba(34,211,238,0.22)":"1px solid rgba(99,179,237,0.1)",borderRadius:12,minHeight:84,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:8,position:"relative"}}>
+                      <span style={{position:"absolute",top:5,right:7,fontSize:8,fontWeight:700,color:"#475569",fontFamily:"monospace"}}>{pos}</span>
+                      {!has
+                        ? <span style={{color:"rgba(99,179,237,0.15)",fontSize:18}}>·</span>
+                        : <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:1}}>
+                            {dob.map((d,i) => <span key={"d"+i} style={{fontSize:20,fontWeight:900,fontFamily:"monospace",lineHeight:1.1,color:"#22d3ee"}}>{d}</span>)}
+                            {name.map((d,i) => <span key={"n"+i} style={{fontSize:20,fontWeight:900,fontFamily:"monospace",lineHeight:1.1,color:"#a78bfa"}}>{d}</span>)}
+                            {kua.map((d,i) => <span key={"k"+i} style={{fontSize:20,fontWeight:900,fontFamily:"monospace",lineHeight:1.1,color:"#34d399"}}>{d}</span>)}
+                          </div>
+                      }
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{display:"flex",gap:16,flexWrap:"wrap",justifyContent:"center"}}>
+                {[{c:"#22d3ee",l:"DOB + Driver + Conductor"},{c:"#a78bfa",l:`Name (${nn})`},{c:"#34d399",l:`Kua (${kn})`}].map(({c,l}) => (
+                  <span key={l} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,color:"#94a3b8"}}>
+                    <span style={{width:7,height:7,borderRadius:"50%",background:c,display:"inline-block"}} />{l}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        function PTabs({ q, st, wk }) {
+          const [t, setT] = useState(0);
+          const items = [{ l:"✦ Qualities", c:q }, { l:"💪 Strength", c:st }, { l:"⚡ Weakness", c:wk }];
+          return (
+            <div>
+              <div style={{display:"flex",gap:3,background:"#0d1528",borderRadius:10,padding:3,marginBottom:14}}>
+                {items.map((x, i) => (
+                  <button key={i} onClick={() => setT(i)} style={{flex:1,padding:"9px 8px",borderRadius:8,border:"none",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",color:t===i?"#f1f5f9":"#475569",background:t===i?"#080e1f":"transparent",boxShadow:t===i?"0 2px 6px rgba(0,0,0,0.4)":"none"}}>
+                    {x.l}
+                  </button>
+                ))}
+              </div>
+              <div style={{background:"#0d1528",border:"1px solid rgba(99,179,237,0.1)",borderRadius:10,padding:"16px 18px",fontSize:13,lineHeight:1.85,color:"#94a3b8",whiteSpace:"pre-line"}}>
+                {items[t].c}
+              </div>
+            </div>
+          );
+        }
+
+        function Card({ children, accent }) {
+          return (
+            <div style={{background:"#080e1f",border:"1px solid rgba(99,179,237,0.1)",borderRadius:16,padding:24,marginBottom:16,position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${accent},transparent)`}} />
+              <div style={{position:"absolute",top:0,left:0,right:0,height:1,background:"linear-gradient(90deg,transparent,rgba(34,211,238,0.15),transparent)"}} />
+              {children}
+            </div>
+          );
+        }
+
+        function CardHead({ icon, title, sub, iconBg }) {
+          return (
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
+              <div style={{width:38,height:38,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,background:iconBg}}>{icon}</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:"#f1f5f9"}}>{title}</div>
+                <div style={{fontSize:11,color:"#475569",marginTop:2}}>{sub}</div>
+              </div>
+            </div>
+          );
+        }
+
+        // ── Main App ──
+        function App() {
+          const [form, setForm] = useState({ fn:"", ln:"", dob:"", gender:"Male" });
+          const [rep, setRep] = useState(null);
+          const [err, setErr] = useState("");
+          const [busy, setBusy] = useState(false);
+          const resultRef = useRef(null);
+
+          const chg = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+          const gen = () => {
+            setErr(""); setRep(null);
+            const r = calcReport(form.fn, form.ln, form.dob, form.gender);
+            if (r.err) { setErr(r.err); return; }
+            setRep(r);
+            setTimeout(() => resultRef.current?.scrollIntoView({ behavior:"smooth", block:"start" }), 80);
+          };
+
+          const rst = () => { setForm({ fn:"", ln:"", dob:"", gender:"Male" }); setRep(null); setErr(""); };
+
+          const downloadJpeg = useCallback(async () => {
+            if (!rep) return;
+            setBusy(true);
+            try {
+              const W = 860, PAD = 32, dpr = 2;
+              const cv = document.createElement("canvas");
+              cv.width = W * dpr;
+              const ctx = cv.getContext("2d");
+
+              const txt = (t, x, y, font, col, align, mw) => { ctx.font=font; ctx.fillStyle=col; ctx.textAlign=align||"left"; mw?ctx.fillText(t,x,y,mw):ctx.fillText(t,x,y); ctx.textAlign="left"; };
+              const rr = (x,y,w,h,r,fill,stroke) => { ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath(); if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();} };
+              const wLines = (text, mw, font) => { ctx.font=font; const words=text.replace(/\n\n/g," ").split(" "); let line="",n=1; for(const w of words){const t2=line?line+" "+w:w; if(ctx.measureText(t2).width>mw&&line){n++;line=w;}else line=t2;} return n; };
+              const drawWrap = (text, x, y, mw, lh, font, col) => { ctx.font=font; ctx.fillStyle=col; const words=text.replace(/\n\n/g," ").split(" "); let line="",cy=y; for(const w of words){const t2=line?line+" "+w:w; if(ctx.measureText(t2).width>mw&&line){ctx.fillText(line,x,cy);line=w;cy+=lh;}else line=t2;} if(line){ctx.fillText(line,x,cy);cy+=lh;} return cy; };
+
+              const inner = W - PAD * 2, lh = 18, f12 = "400 12px sans-serif";
+              const ql = wLines(rep.qualities, inner-20, f12);
+              const sl = wLines(rep.strength, inner-20, f12);
+              const wl = wLines(rep.weakness, inner-20, f12);
+              const persH = 60 + (ql + sl + wl + 6) * lh + 48;
+              const totalH = PAD + 110 + 80 + 20 + 100 + 20 + 280 + 20 + 170 + 20 + 130 + 20 + persH + PAD;
+              cv.height = totalH * dpr;
+              ctx.scale(dpr, dpr);
+
+              ctx.fillStyle = "#03060f"; ctx.fillRect(0,0,W,totalH);
+              ctx.strokeStyle = "rgba(99,179,237,0.03)"; ctx.lineWidth=1;
+              for (let x=0;x<W;x+=52){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,totalH);ctx.stroke();}
+              for (let y=0;y<totalH;y+=52){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+              const g1=ctx.createRadialGradient(120,80,0,120,80,300); g1.addColorStop(0,"rgba(34,211,238,0.09)"); g1.addColorStop(1,"transparent"); ctx.fillStyle=g1; ctx.fillRect(0,0,W,totalH);
+              const g2=ctx.createRadialGradient(W-100,totalH-100,0,W-100,totalH-100,260); g2.addColorStop(0,"rgba(167,139,250,0.09)"); g2.addColorStop(1,"transparent"); ctx.fillStyle=g2; ctx.fillRect(0,0,W,totalH);
+
+              let Y = PAD;
+              const gT=ctx.createLinearGradient(0,0,W,0); gT.addColorStop(0,"#fff"); gT.addColorStop(0.35,"#22d3ee"); gT.addColorStop(0.65,"#a78bfa"); gT.addColorStop(1,"#f472b6");
+              ctx.font="900 40px sans-serif"; ctx.fillStyle=gT; ctx.textAlign="center"; ctx.fillText("Birth Chart Calculator",W/2,Y+46);
+              ctx.font="500 14px sans-serif"; ctx.fillStyle="#94a3b8"; ctx.fillText("by ",W/2-50,Y+72);
+              const gA=ctx.createLinearGradient(W/2-28,0,W/2+80,0); gA.addColorStop(0,"#22d3ee"); gA.addColorStop(1,"#a78bfa");
+              ctx.font="700 14px sans-serif"; ctx.fillStyle=gA; ctx.fillText("Aasif Ali Nur",W/2+16,Y+72);
+              ctx.font="400 12px sans-serif"; ctx.fillStyle="#94a3b8"; ctx.fillText("Unlock your cosmic blueprint through the ancient science of numbers",W/2,Y+94);
+              ctx.textAlign="left"; Y+=110;
+
+              rr(PAD,Y,inner,68,12,"rgba(34,211,238,0.05)","rgba(34,211,238,0.14)");
+              const ga=ctx.createLinearGradient(PAD+10,Y,PAD+58,Y+58); ga.addColorStop(0,"#22d3ee"); ga.addColorStop(1,"#a78bfa");
+              ctx.fillStyle=ga; ctx.beginPath(); ctx.arc(PAD+34,Y+34,24,0,Math.PI*2); ctx.fill();
+              txt((rep.fn[0]+rep.ln[0]).toUpperCase(),PAD+34,Y+42,"700 16px sans-serif","#fff","center");
+              txt(rep.fn+" "+rep.ln,PAD+70,Y+28,"700 18px sans-serif","#f1f5f9");
+              rr(PAD+70,Y+37,108,20,10,"#0d1528","rgba(99,179,237,0.12)"); txt("📅 "+rep.dob,PAD+78,Y+51,"11px sans-serif","#94a3b8");
+              rr(PAD+186,Y+37,78,20,10,"#0d1528","rgba(99,179,237,0.12)"); txt((rep.gender==="Male"?"♂":"♀")+" "+rep.gender,PAD+194,Y+51,"11px sans-serif","#94a3b8");
+              Y+=84;
+
+              const cBase=(y,h,col)=>{rr(PAD,y,inner,h,12,"#080e1f","rgba(99,179,237,0.1)"); const g=ctx.createLinearGradient(PAD,y,PAD+140,y); g.addColorStop(0,col); g.addColorStop(1,"transparent"); ctx.fillStyle=g; ctx.fillRect(PAD,y,inner,2);};
+
+              Y+=20; cBase(Y,96,"#22d3ee");
+              txt("🔢",PAD+16,Y+26,"16px sans-serif","#f1f5f9"); txt("Numerology Summary",PAD+40,Y+22,"700 13px sans-serif","#f1f5f9"); txt("Your four core numbers",PAD+40,Y+38,"11px sans-serif","#475569");
+              [{l:"Driver",v:rep.dr,c:"#22d3ee"},{l:"Conductor",v:rep.cn,c:"#60a5fa"},{l:"Kua",v:rep.kn,c:"#a78bfa"},{l:"Name",v:rep.nn,c:"#f472b6"}].forEach(({l,v,c},i)=>{
+                const cx=PAD+i*(inner/4); rr(cx+4,Y+44,inner/4-8,46,8,"#0d1528","rgba(99,179,237,0.08)");
+                const g=ctx.createLinearGradient(cx+4,Y+44,cx+inner/4,Y+44); g.addColorStop(0,c); g.addColorStop(1,"transparent"); ctx.fillStyle=g; ctx.fillRect(cx+4,Y+44,inner/4-8,2);
+                txt(l,cx+inner/8,Y+60,"700 9px sans-serif","#475569","center");
+                ctx.shadowColor=c; ctx.shadowBlur=12; txt(String(v),cx+inner/8,Y+84,"900 36px monospace",c,"center"); ctx.shadowBlur=0;
+              });
+              Y+=112;
+
+              cBase(Y,280,"#60a5fa");
+              txt("⊞",PAD+16,Y+26,"16px sans-serif","#f1f5f9"); txt("Lo Shu Grid",PAD+40,Y+22,"700 13px sans-serif","#f1f5f9"); txt("Magic square — all numbers mapped",PAD+40,Y+38,"11px sans-serif","#475569");
+              const gSz=74,gGap=8,gW2=3*(gSz+gGap)-gGap,gX=PAD+(inner-gW2)/2,gY=Y+50;
+              rep.grid.forEach((row,ri)=>{row.forEach(({pos,dob,name,kua},ci)=>{
+                const cx=gX+ci*(gSz+gGap),cy=gY+ri*(gSz+gGap),has=dob.length+name.length+kua.length>0;
+                rr(cx,cy,gSz,gSz,10,has?"rgba(34,211,238,0.03)":"#0d1528",has?"rgba(34,211,238,0.22)":"rgba(99,179,237,0.08)");
+                txt(String(pos),cx+gSz-6,cy+13,"700 8px monospace","#475569","right");
+                const all=[...dob.map(d=>({v:d,c:"#22d3ee"})),...name.map(d=>({v:d,c:"#a78bfa"})),...kua.map(d=>({v:d,c:"#34d399"}))];
+                if(!all.length){txt("·",cx+gSz/2,cy+gSz/2+8,"18px sans-serif","rgba(99,179,237,0.12)","center");}
+                else{const ns=all.length>3?13:18,tw=all.length*(ns+5);let sx=cx+(gSz-tw)/2;all.forEach(({v,c})=>{ctx.shadowColor=c;ctx.shadowBlur=8;txt(String(v),sx,cy+gSz/2+7,"900 "+ns+"px monospace",c);ctx.shadowBlur=0;sx+=ns+6;});}
+              });});
+              const legY=gY+3*(gSz+gGap)+8; let lx=PAD+(inner-360)/2;
+              [{c:"#22d3ee",l:"DOB + Driver + Conductor"},{c:"#a78bfa",l:"Name ("+rep.nn+")"},{c:"#34d399",l:"Kua ("+rep.kn+")"}].forEach(({c,l})=>{
+                ctx.fillStyle=c; ctx.shadowColor=c; ctx.shadowBlur=4; ctx.beginPath(); ctx.arc(lx+4,legY+4,4,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+                txt(l,lx+13,legY+8,"600 10px sans-serif","#94a3b8"); lx+=ctx.measureText(l).width+30;
+              });
+              Y+=296;
+
+              cBase(Y,168,"#34d399");
+              txt("🎯",PAD+16,Y+26,"16px sans-serif","#f1f5f9"); txt("Recommendations",PAD+40,Y+22,"700 13px sans-serif","#f1f5f9"); txt("Lucky and unlucky influences",PAD+40,Y+38,"11px sans-serif","#475569");
+              const hw=(inner-12)/2;
+              rr(PAD,Y+46,hw,44,8,"rgba(52,211,153,0.05)","rgba(52,211,153,0.15)"); txt("✦ GOOD NUMBERS",PAD+10,Y+60,"700 8px sans-serif","#34d399"); txt(rep.gn,PAD+10,Y+80,"500 11px monospace","#f1f5f9","left",hw-16);
+              rr(PAD+hw+12,Y+46,hw,44,8,"rgba(244,114,182,0.05)","rgba(244,114,182,0.15)"); txt("✦ BAD NUMBERS",PAD+hw+22,Y+60,"700 8px sans-serif","#f472b6"); txt(rep.bn,PAD+hw+22,Y+80,"500 11px monospace","#f1f5f9","left",hw-16);
+              ctx.strokeStyle="rgba(99,179,237,0.08)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(PAD,Y+98); ctx.lineTo(PAD+inner,Y+98); ctx.stroke();
+              txt("✦ GOOD COLORS",PAD,Y+114,"700 8px sans-serif","#475569"); txt("✦ BAD COLORS",PAD+hw+12,Y+114,"700 8px sans-serif","#475569");
+              const drawDots=(str,sx,sy)=>{splitC(str).slice(0,5).forEach(c=>{ctx.fillStyle=toHex(c); ctx.beginPath(); ctx.arc(sx+5,sy,5,0,Math.PI*2); ctx.fill(); if(c.toLowerCase()==="white"){ctx.strokeStyle="#334155";ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx+5,sy,5,0,Math.PI*2);ctx.stroke();} txt(c,sx+14,sy+4,"500 10px sans-serif","#f1f5f9"); sx+=ctx.measureText(c).width+26;});};
+              drawDots(rep.gc,PAD,Y+134); drawDots(rep.bc,PAD+hw+12,Y+134);
+              Y+=184;
+
+              cBase(Y,128,"#a78bfa");
+              txt("💼",PAD+16,Y+26,"16px sans-serif","#f1f5f9"); txt("Career & Skills",PAD+40,Y+22,"700 13px sans-serif","#f1f5f9"); txt("Your professional destiny",PAD+40,Y+38,"11px sans-serif","#475569");
+              txt("JOB OR BUSINESS",PAD,Y+54,"700 8px sans-serif","#475569"); rr(PAD,Y+60,inner,26,6,"#0d1528","rgba(99,179,237,0.08)"); txt(rep.job,PAD+10,Y+77,"400 12px sans-serif","#94a3b8","left",inner-20);
+              txt("SKILL AND SECTOR",PAD,Y+96,"700 8px sans-serif","#475569"); rr(PAD,Y+102,inner,20,6,"#0d1528","rgba(99,179,237,0.08)"); txt(rep.skills,PAD+10,Y+116,"400 12px sans-serif","#94a3b8","left",inner-20);
+              Y+=144;
+
+              cBase(Y,persH,"#f472b6");
+              txt("🧠",PAD+16,Y+26,"16px sans-serif","#f1f5f9"); txt("Personality Analysis",PAD+40,Y+22,"700 13px sans-serif","#f1f5f9"); txt("Deep character insights",PAD+40,Y+38,"11px sans-serif","#475569");
+              let py=Y+52;
+              [[rep.qualities,"✦ QUALITIES","#34d399"],[rep.strength,"💪 STRENGTH","#60a5fa"],[rep.weakness,"⚡ WEAKNESS","#f472b6"]].forEach(([text,label,lc])=>{
+                txt(label,PAD,py,"700 8px sans-serif",lc); py+=12;
+                const endY=drawWrap(text,PAD+10,py+14,inner-20,lh,f12,"#94a3b8");
+                const bh=endY-py+4; rr(PAD,py,inner,bh,6,"#0d1528","rgba(99,179,237,0.08)");
+                drawWrap(text,PAD+10,py+14,inner-20,lh,f12,"#94a3b8");
+                py+=bh+12;
+              });
+
+              const link=document.createElement("a");
+              link.download=`birth-chart-${rep.fn.toLowerCase()}-${rep.ln.toLowerCase()}.jpg`;
+              link.href=cv.toDataURL("image/jpeg",0.95);
+              link.click();
+            } catch(e) {
+              alert("Download failed: "+e.message);
+            } finally {
+              setBusy(false);
+            }
+          }, [rep]);
+
+          const ini = rep ? (rep.fn[0]+rep.ln[0]).toUpperCase() : "";
+          const inp = { background:"#0d1528", border:"1px solid rgba(99,179,237,0.12)", borderRadius:10, padding:"13px 15px", color:"#f1f5f9", fontFamily:"inherit", fontSize:14, outline:"none", width:"100%", display:"block" };
+
+          return (
+            <div style={{fontFamily:"'Outfit',system-ui,sans-serif",background:"#03060f",minHeight:"100vh",color:"#f1f5f9"}}>
+              {/* BG */}
+              <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden"}}>
+                <div style={{position:"absolute",width:500,height:500,top:-100,left:-100,borderRadius:"50%",filter:"blur(60px)",background:"rgba(34,211,238,0.08)"}} />
+                <div style={{position:"absolute",width:400,height:400,bottom:-80,right:-80,borderRadius:"50%",filter:"blur(60px)",background:"rgba(167,139,250,0.08)"}} />
+                <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px)",backgroundSize:"52px 52px"}} />
+              </div>
+
+              <div style={{position:"relative",zIndex:1,maxWidth:860,margin:"0 auto",padding:"48px 16px 80px"}}>
+
+                {/* Header */}
+                <div style={{textAlign:"center",marginBottom:52}}>
+                  <div style={{fontSize:"clamp(28px,5.5vw,52px)",fontWeight:900,letterSpacing:-1.5,lineHeight:1.05,marginBottom:12,background:"linear-gradient(135deg,#fff 0%,#22d3ee 35%,#a78bfa 65%,#f472b6 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
+                    Birth Chart Calculator
+                  </div>
+                  <div style={{fontSize:15,color:"#94a3b8",marginBottom:10}}>
+                    by <span style={{background:"linear-gradient(135deg,#22d3ee,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",fontWeight:800}}>Aasif Ali Nur</span>
+                  </div>
+                  <div style={{fontSize:15,color:"#94a3b8",lineHeight:1.6}}>Unlock your cosmic blueprint through the ancient science of numbers</div>
+                </div>
+
+                {/* Input */}
+                <Card accent="#22d3ee">
+                  <CardHead icon="🔮" title="Personal Details" sub="Enter your information to generate the chart" iconBg="rgba(34,211,238,0.1)" />
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                    <div><label style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#94a3b8",display:"block",marginBottom:7}}>First Name</label><input style={inp} name="fn" value={form.fn} onChange={chg} placeholder="e.g. Kashif" autoComplete="off" /></div>
+                    <div><label style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#94a3b8",display:"block",marginBottom:7}}>Last Name</label><input style={inp} name="ln" value={form.ln} onChange={chg} placeholder="e.g. Rasheed" autoComplete="off" /></div>
+                    <div><label style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#94a3b8",display:"block",marginBottom:7}}>Date of Birth (DD/MM/YYYY)</label><input style={inp} name="dob" value={form.dob} onChange={chg} placeholder="e.g. 26/06/1978" autoComplete="off" /></div>
+                    <div>
+                      <label style={{fontSize:11,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#94a3b8",display:"block",marginBottom:7}}>Gender</label>
+                      <select style={inp} name="gender" value={form.gender} onChange={chg}>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{display:"flex",gap:10,marginTop:18,flexWrap:"wrap"}}>
+                    <button onClick={gen} style={{flex:1,minWidth:180,background:"linear-gradient(135deg,#0ea5e9,#22d3ee 50%,#a78bfa)",border:"none",borderRadius:10,padding:"14px 24px",color:"#fff",fontFamily:"inherit",fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 24px rgba(34,211,238,0.2)"}}>⚡ Generate Birth Chart</button>
+                    <button onClick={rst} style={{background:"transparent",border:"1px solid rgba(99,179,237,0.2)",borderRadius:10,padding:"14px 18px",color:"#94a3b8",fontFamily:"inherit",fontSize:13,fontWeight:600,cursor:"pointer"}}>↺ Reset</button>
+                  </div>
+                  {err && <div style={{marginTop:14,padding:"12px 16px",background:"rgba(239,68,68,0.07)",border:"1px solid rgba(239,68,68,0.2)",borderRadius:10,color:"#f87171",fontSize:13}}>⚠ {err}</div>}
+                </Card>
+
+                {/* Results */}
+                {rep && (
+                  <div ref={resultRef}>
+                    {/* Profile banner */}
+                    <div style={{background:"linear-gradient(135deg,rgba(34,211,238,0.06),rgba(167,139,250,0.06))",border:"1px solid rgba(34,211,238,0.14)",borderRadius:18,padding:"24px 28px",marginBottom:16,display:"flex",alignItems:"center",gap:20,flexWrap:"wrap"}}>
+                      <div style={{width:62,height:62,borderRadius:"50%",background:"linear-gradient(135deg,#22d3ee,#a78bfa)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:"#fff",flexShrink:0,boxShadow:"0 0 0 3px rgba(34,211,238,0.12)"}}>
+                        {ini}
+                      </div>
+                      <div>
+                        <div style={{fontSize:"clamp(18px,3.5vw,26px)",fontWeight:800,letterSpacing:-0.5,marginBottom:6}}>{rep.fn} {rep.ln}</div>
+                        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                          {["📅 "+rep.dob, (rep.gender==="Male"?"♂":"♀")+" "+rep.gender].map(t => (
+                            <span key={t} style={{fontSize:11,fontWeight:600,color:"#94a3b8",background:"rgba(99,179,237,0.07)",border:"1px solid rgba(99,179,237,0.1)",borderRadius:100,padding:"3px 12px"}}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Summary */}
+                    <Card accent="#22d3ee">
+                      <CardHead icon="🔢" title="Numerology Summary" sub="Your four core numbers" iconBg="rgba(34,211,238,0.1)" />
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+                        {[{l:"Driver",v:rep.dr,c:"#22d3ee"},{l:"Conductor",v:rep.cn,c:"#60a5fa"},{l:"Kua",v:rep.kn,c:"#a78bfa"},{l:"Name",v:rep.nn,c:"#f472b6"}].map(({l,v,c}) => (
+                          <div key={l} style={{background:"#0d1528",border:"1px solid rgba(99,179,237,0.1)",borderRadius:12,padding:"16px 10px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+                            <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c},transparent)`}} />
+                            <div style={{fontSize:9,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"#475569",marginBottom:8}}>{l}</div>
+                            <div style={{fontSize:44,fontWeight:900,fontFamily:"monospace",lineHeight:1,color:c,textShadow:`0 0 16px ${c}80`}}>{v}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    {/* Grid */}
+                    <Card accent="#60a5fa">
+                      <CardHead icon="⊞" title="Lo Shu Grid" sub="Magic square — all numbers mapped" iconBg="rgba(96,165,250,0.1)" />
+                      <GridView grid={rep.grid} nn={rep.nn} kn={rep.kn} />
+                    </Card>
+
+                    {/* Recommendations */}
+                    <Card accent="#34d399">
+                      <CardHead icon="🎯" title="Recommendations" sub="Lucky and unlucky influences" iconBg="rgba(52,211,153,0.1)" />
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                        <div style={{borderRadius:12,padding:"14px 16px",border:"1px solid rgba(52,211,153,0.15)",background:"rgba(52,211,153,0.05)"}}>
+                          <div style={{fontSize:9,fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:6,color:"#34d399"}}>✦ Good Numbers</div>
+                          <div style={{fontSize:13,fontWeight:500,color:"#f1f5f9",lineHeight:1.7,fontFamily:"monospace"}}>{rep.gn}</div>
+                        </div>
+                        <div style={{borderRadius:12,padding:"14px 16px",border:"1px solid rgba(244,114,182,0.15)",background:"rgba(244,114,182,0.05)"}}>
+                          <div style={{fontSize:9,fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:6,color:"#f472b6"}}>✦ Bad Numbers</div>
+                          <div style={{fontSize:13,fontWeight:500,color:"#f1f5f9",lineHeight:1.7,fontFamily:"monospace"}}>{rep.bn}</div>
+                        </div>
+                      </div>
+                      <div style={{height:1,background:"rgba(99,179,237,0.1)",margin:"16px 0"}} />
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                        <div><div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#475569",marginBottom:8}}>✦ Good Colors</div><Swatches str={rep.gc} /></div>
+                        <div><div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#475569",marginBottom:8}}>✦ Bad Colors</div><Swatches str={rep.bc} /></div>
+                      </div>
+                    </Card>
+
+                    {/* Career */}
+                    <Card accent="#a78bfa">
+                      <CardHead icon="💼" title="Career & Skills" sub="Your professional destiny" iconBg="rgba(167,139,250,0.1)" />
+                      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                        <div><div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#475569",marginBottom:8}}>Job or Business</div><div style={{background:"#0d1528",border:"1px solid rgba(99,179,237,0.1)",borderRadius:10,padding:"16px 18px",fontSize:13,lineHeight:1.85,color:"#94a3b8"}}>{rep.job}</div></div>
+                        <div><div style={{fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",color:"#475569",marginBottom:8}}>Skill and Sector</div><div style={{background:"#0d1528",border:"1px solid rgba(99,179,237,0.1)",borderRadius:10,padding:"16px 18px",fontSize:13,lineHeight:1.85,color:"#94a3b8"}}>{rep.skills}</div></div>
+                      </div>
+                    </Card>
+
+                    {/* Personality */}
+                    <Card accent="#f472b6">
+                      <CardHead icon="🧠" title="Personality Analysis" sub="Deep character insights" iconBg="rgba(244,114,182,0.1)" />
+                      <PTabs q={rep.qualities} st={rep.strength} wk={rep.weakness} />
+                    </Card>
+
+                    <button onClick={downloadJpeg} disabled={busy} style={{width:"100%",marginTop:8,background:"rgba(34,211,238,0.05)",border:"1px solid rgba(34,211,238,0.18)",borderRadius:10,padding:14,color:"#22d3ee",fontFamily:"inherit",fontSize:13,fontWeight:700,cursor:busy?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,opacity:busy?0.6:1}}>
+                      {busy ? "⏳ Generating JPEG..." : "📥 Download Report as JPEG"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // Render app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
